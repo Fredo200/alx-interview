@@ -1,42 +1,48 @@
 #!/usr/bin/python3
-"""0. Prime Game - Maria and Ben are playing a game"""
+"""Prime Game - Maria and Ben's number-based game"""
 
-
-def isWinner(x, nums):
-    """x - rounds
-    nums - numbers list
+def isWinner(rounds, numbers):
     """
-    if x <= 0 or nums is None:
+    Determines the overall winner after a series of rounds.
+
+    Args:
+        rounds (int): Number of rounds to be played.
+        numbers (list): List of integers representing the upper limit for each round.
+
+    Returns:
+        str or None: "Maria" if Maria wins, "Ben" if Ben wins, or None if it's a tie.
+    """
+    if rounds <= 0 or not numbers:
         return None
-    if x != len(nums):
+    if rounds != len(numbers):
         return None
 
-    ben = 0
-    maria = 0
+    ben_score = 0
+    maria_score = 0
 
-    a = [1 for x in range(sorted(nums)[-1] + 1)]
-    a[0], a[1] = 0, 0
-    for i in range(2, len(a)):
-        rm_multiples(a, i)
+    max_num = max(numbers)
+    sieve = [True] * (max_num + 1)
+    sieve[0], sieve[1] = False, False  # 0 and 1 are not prime
 
-    for i in nums:
-        if sum(a[0:i + 1]) % 2 == 0:
-            ben += 1
+    for i in range(2, int(max_num**0.5) + 1):
+        if sieve[i]:
+            for j in range(i * i, max_num + 1, i):
+                sieve[j] = False
+
+    prime_count = [0] * (max_num + 1)
+    for i in range(1, max_num + 1):
+        prime_count[i] = prime_count[i - 1] + (1 if sieve[i] else 0)
+
+    for n in numbers:
+        if prime_count[n] % 2 == 0:
+            ben_score += 1
         else:
-            maria += 1
-    if ben > maria:
-        return "Ben"
-    if maria > ben:
+            maria_score += 1
+
+    if maria_score > ben_score:
         return "Maria"
-    return None
+    elif ben_score > maria_score:
+        return "Ben"
+    else:
+        return None
 
-
-def rm_multiples(ls, x):
-    """removes multiple
-    of primes
-    """
-    for i in range(2, len(ls)):
-        try:
-            ls[i * x] = 0
-        except (ValueError, IndexError):
-            break
