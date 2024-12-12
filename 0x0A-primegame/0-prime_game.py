@@ -1,48 +1,59 @@
-#!/usr/bin/python3
-"""Prime Game - Maria and Ben's number-based game"""
+def isWinner(x, nums):
+    def is_prime(num):
+        if num < 2:
+            return False
+        for i in range(2, int(num**0.5) + 1):
+            if num % i == 0:
+                return False
+        return True
 
-def isWinner(rounds, numbers):
-    """
-    Determines the overall winner after a series of rounds.
+    def primes_up_to(n):
+        primes = []
+        for i in range(2, n + 1):
+            if is_prime(i):
+                primes.append(i)
+        return primes
 
-    Args:
-        rounds (int): Number of rounds to be played.
-        numbers (list): List of integers representing the upper limit for each round.
+    def optimal_moves(n):
+        primes = primes_up_to(n)
+        moves = 0
+        visited = [False] * (n + 1)
 
-    Returns:
-        str or None: "Maria" if Maria wins, "Ben" if Ben wins, or None if it's a tie.
-    """
-    if rounds <= 0 or not numbers:
+        for prime in primes:
+            if not visited[prime]:
+                moves += 1
+                for multiple in range(prime, n + 1, prime):
+                    visited[multiple] = True
+
+        return moves
+
+    if not nums or x < 1:
         return None
-    if rounds != len(numbers):
-        return None
 
-    ben_score = 0
-    maria_score = 0
+    maria_wins = 0
+    ben_wins = 0
 
-    max_num = max(numbers)
-    sieve = [True] * (max_num + 1)
-    sieve[0], sieve[1] = False, False  # 0 and 1 are not prime
+    for n in nums:
+        if n < 1:
+            ben_wins += 1
+            continue
 
-    for i in range(2, int(max_num**0.5) + 1):
-        if sieve[i]:
-            for j in range(i * i, max_num + 1, i):
-                sieve[j] = False
+        total_moves = optimal_moves(n)
 
-    prime_count = [0] * (max_num + 1)
-    for i in range(1, max_num + 1):
-        prime_count[i] = prime_count[i - 1] + (1 if sieve[i] else 0)
-
-    for n in numbers:
-        if prime_count[n] % 2 == 0:
-            ben_score += 1
+        # Maria starts the game, so if the number of moves is odd, Maria wins.
+        if total_moves % 2 == 1:
+            maria_wins += 1
         else:
-            maria_score += 1
+            ben_wins += 1
 
-    if maria_score > ben_score:
+    if maria_wins > ben_wins:
         return "Maria"
-    elif ben_score > maria_score:
+    elif ben_wins > maria_wins:
         return "Ben"
     else:
         return None
+
+# Example usage
+if __name__ == "__main__":
+    print("Winner: {}".format(isWinner(5, [2, 5, 1, 4, 3])))
 
